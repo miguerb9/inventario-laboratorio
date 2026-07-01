@@ -10,3 +10,4 @@ class Reactivo(Base):
     unidad = Column(String, nullable=False)
     fecha_caducidad = Column(Date, nullable=True)
     stock_minimo = Column(Float, nullable=False, default=0)
+    fds_pdf = Column(String, nullable=True)
