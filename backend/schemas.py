@@ -8,6 +8,7 @@ class ReactivoBase(BaseModel):
     unidad: str
     fecha_caducidad: Optional[date] = None
     stock_minimo: float = 0
+    fds_pdf: Optional[str] = None
 
 class ReactivoCrear(ReactivoBase):
     pass

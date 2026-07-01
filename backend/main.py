@@ -1,6 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
+from fastapi import File, UploadFile
+from datetime import date, timedelta
+import shutil
+import os
 import models
 import schemas
 
@@ -61,7 +65,7 @@ def borrar_reactivo(reactivo_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"mensaje": f"Reactivo {reactivo_id} eliminado correctamente"}
 
-from datetime import date, timedelta
+
 
 @app.get("/alertas")
 def obtener_alertas(db: Session = Depends(get_db)):
@@ -81,3 +85,23 @@ def obtener_alertas(db: Session = Depends(get_db)):
         "stock_bajo": [schemas.ReactivoRespuesta.model_validate(r) for r in stock_bajo],
         "proximos_a_caducar": [schemas.ReactivoRespuesta.model_validate(r) for r in proximos_a_caducar]
     }
+
+@app.post("/reactivos/{reactivo_id}/fds")
+async def subir_fds(reactivo_id: int, archivo: UploadFile = File(...), db: Session = Depends(get_db)):
+    reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
+    if reactivo is None:
+        raise HTTPException(status_code=404, detail="Reactivo no encontrado")
+
+    if not archivo.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Solo se permiten archivos PDF")
+
+    os.makedirs("uploads", exist_ok=True)
+    ruta = f"uploads/{reactivo_id}_{archivo.filename}"
+
+    with open(ruta, "wb") as buffer:
+        shutil.copyfileobj(archivo.file, buffer)
+
+    reactivo.fds_pdf = ruta
+    db.commit()
+    db.refresh(reactivo)
+    return {"mensaje": "FDS subida correctamente", "ruta": ruta}
