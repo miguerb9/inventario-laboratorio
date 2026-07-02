@@ -18,3 +18,20 @@ class ReactivoRespuesta(ReactivoBase):
 
     class Config:
         from_attributes = True
+
+class UsuarioCrear(BaseModel):
+    email: str
+    nombre: str
+    apellido: str
+    password: str
+    rol: str = "viewer"
+
+class UsuarioRespuesta(BaseModel):
+    id: int
+    email: str
+    nombre: str
+    apellido: str
+    rol: str
+
+    class Config:
+        from_attributes = True

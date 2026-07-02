@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
 from fastapi import File, UploadFile
 from datetime import date, timedelta
+from fastapi.responses import FileResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from auth import hashear_password, verificar_password, crear_token, obtener_usuario_actual
 import shutil
 import os
 import models
@@ -105,3 +108,42 @@ async def subir_fds(reactivo_id: int, archivo: UploadFile = File(...), db: Sessi
     db.commit()
     db.refresh(reactivo)
     return {"mensaje": "FDS subida correctamente", "ruta": ruta}
+
+
+@app.get("/reactivos/{reactivo_id}/fds")
+def descargar_fds(reactivo_id: int, db: Session = Depends(get_db)):
+    reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
+    if reactivo is None:
+        raise HTTPException(status_code=404, detail="Reactivo no encontrado")
+    if reactivo.fds_pdf is None:
+        raise HTTPException(status_code=404, detail="Este reactivo no tiene FDS asociada")
+    return FileResponse(reactivo.fds_pdf, media_type="application/pdf", filename=f"FDS_{reactivo.nombre}.pdf")
+
+@app.post("/registro", response_model=schemas.UsuarioRespuesta)
+def registro(usuario: schemas.UsuarioCrear, db: Session = Depends(get_db)):
+    existe = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
+    if existe:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    nuevo = models.Usuario(
+        email=usuario.email,
+        nombre=usuario.nombre,
+        apellido=usuario.apellido,
+        hashed_password=hashear_password(usuario.password),
+        rol=usuario.rol
+    )
+    db.add(nuevo)
+    db.commit()
+    db.refresh(nuevo)
+    return nuevo
+
+@app.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    usuario = db.query(models.Usuario).filter(models.Usuario.email == form_data.username).first()
+    if not usuario or not verificar_password(form_data.password, usuario.hashed_password):
+        raise HTTPException(status_code=401, detail="Email o contraseña incorrectos")
+    token = crear_token({"sub": usuario.email})
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/me", response_model=schemas.UsuarioRespuesta)
+def mi_perfil(usuario_actual = Depends(obtener_usuario_actual)):
+    return usuario_actual
