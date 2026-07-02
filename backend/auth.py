@@ -1,17 +1,20 @@
+import os
+import bcrypt
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
 
+load_dotenv()
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def get_db():
@@ -22,10 +25,10 @@ def get_db():
         db.close()
 
 def hashear_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 def verificar_password(password: str, hashed: str) -> bool:
-    return pwd_context.verify(password, hashed)
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 def crear_token(data: dict) -> str:
     datos = data.copy()
