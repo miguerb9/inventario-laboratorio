@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, File, UploadFile
 from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
-from fastapi import File, UploadFile
 from datetime import date, timedelta
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -50,40 +49,34 @@ def actualizar_reactivo(reactivo_id: int, datos: schemas.ReactivoCrear, db: Sess
     reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
     if reactivo is None:
         raise HTTPException(status_code=404, detail="Reactivo no encontrado")
-
     for campo, valor in datos.model_dump().items():
         setattr(reactivo, campo, valor)
-
     db.commit()
     db.refresh(reactivo)
     return reactivo
 
 @app.delete("/reactivos/{reactivo_id}")
-def borrar_reactivo(reactivo_id: int, db: Session = Depends(get_db)):
+def borrar_reactivo(reactivo_id: int, db: Session = Depends(get_db), usuario_actual = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Solo administradores pueden borrar reactivos")
     reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
     if reactivo is None:
         raise HTTPException(status_code=404, detail="Reactivo no encontrado")
-
     db.delete(reactivo)
     db.commit()
     return {"mensaje": f"Reactivo {reactivo_id} eliminado correctamente"}
-
-
 
 @app.get("/alertas")
 def obtener_alertas(db: Session = Depends(get_db)):
     hoy = date.today()
     limite_caducidad = hoy + timedelta(days=30)
-
     stock_bajo = db.query(models.Reactivo).filter(
         models.Reactivo.cantidad <= models.Reactivo.stock_minimo
     ).all()
-
     proximos_a_caducar = db.query(models.Reactivo).filter(
         models.Reactivo.fecha_caducidad <= limite_caducidad,
         models.Reactivo.fecha_caducidad != None
     ).all()
-
     return {
         "stock_bajo": [schemas.ReactivoRespuesta.model_validate(r) for r in stock_bajo],
         "proximos_a_caducar": [schemas.ReactivoRespuesta.model_validate(r) for r in proximos_a_caducar]
@@ -94,21 +87,16 @@ async def subir_fds(reactivo_id: int, archivo: UploadFile = File(...), db: Sessi
     reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
     if reactivo is None:
         raise HTTPException(status_code=404, detail="Reactivo no encontrado")
-
     if not archivo.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Solo se permiten archivos PDF")
-
     os.makedirs("uploads", exist_ok=True)
     ruta = f"uploads/{reactivo_id}_{archivo.filename}"
-
     with open(ruta, "wb") as buffer:
         shutil.copyfileobj(archivo.file, buffer)
-
     reactivo.fds_pdf = ruta
     db.commit()
     db.refresh(reactivo)
     return {"mensaje": "FDS subida correctamente", "ruta": ruta}
-
 
 @app.get("/reactivos/{reactivo_id}/fds")
 def descargar_fds(reactivo_id: int, db: Session = Depends(get_db)):
@@ -147,3 +135,20 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @app.get("/me", response_model=schemas.UsuarioRespuesta)
 def mi_perfil(usuario_actual = Depends(obtener_usuario_actual)):
     return usuario_actual
+
+@app.get("/usuarios", response_model=list[schemas.UsuarioRespuesta])
+def listar_usuarios(db: Session = Depends(get_db), usuario_actual = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol not in ["admin", "superadmin"]:
+        raise HTTPException(status_code=403, detail="Sin permisos para ver usuarios")
+    return db.query(models.Usuario).all()
+
+@app.delete("/usuarios/{usuario_id}")
+def borrar_usuario(usuario_id: int, db: Session = Depends(get_db), usuario_actual = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol != "superadmin":
+        raise HTTPException(status_code=403, detail="Solo el superadmin puede borrar usuarios")
+    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    db.delete(usuario)
+    db.commit()
+    return {"mensaje": f"Usuario {usuario_id} eliminado correctamente"}
