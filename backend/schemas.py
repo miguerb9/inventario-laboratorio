@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional
+from enum import Enum
+
+class Rol(str, Enum):
+    viewer = "viewer"
+    admin = "admin"
+    superadmin = "superadmin"
 
 class ReactivoBase(BaseModel):
     nombre: str
@@ -24,14 +30,13 @@ class UsuarioCrear(BaseModel):
     nombre: str
     apellido: str
     password: str
-    rol: str = "viewer"
+    rol: Rol = Rol.viewer
 
 class UsuarioRespuesta(BaseModel):
     id: int
     email: str
     nombre: str
     apellido: str
-    rol: str
-
+    rol: Rol
     class Config:
         from_attributes = True

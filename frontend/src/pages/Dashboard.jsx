@@ -1,0 +1,182 @@
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AlertTriangle, FlaskConical, Calendar, TrendingDown } from 'lucide-react'
+import Sidebar from '../components/Sidebar'
+import { getReactivos } from '../api/reactivos'
+import { getMe } from '../api/auth'
+import client from '../api/client'
+
+function Dashboard() {
+  const navigate = useNavigate()
+  const [reactivos, setReactivos] = useState([])
+  const [usuario, setUsuario] = useState(null)
+  const [alertas, setAlertas] = useState({ stock_bajo: [], proximos_a_caducar: [] })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function cargar() {
+      try {
+        const [reactivosData, alertasData, usuarioData] = await Promise.all([
+          getReactivos(),
+          client.get('/alertas').then(r => r.data),
+          getMe()
+        ])
+        setReactivos(reactivosData)
+        setAlertas(alertasData)
+        setUsuario(usuarioData)
+      } catch {
+        navigate('/login')
+      } finally {
+        setLoading(false)
+      }
+    }
+    cargar()
+  }, [navigate])
+
+  function getEstado(r) {
+    const hoy = new Date()
+    const cad = r.fecha_caducidad ? new Date(r.fecha_caducidad) : null
+    if (cad && cad < hoy) return 'Caducado'
+    if (cad && (cad - hoy) / (1000 * 60 * 60 * 24) <= 30) return 'Por caducar'
+    if (r.cantidad <= r.stock_minimo) return 'Stock bajo'
+    return 'Normal'
+  }
+
+  function getBadge(estado) {
+    const estilos = {
+      'Caducado': 'bg-red-100 text-red-700',
+      'Por caducar': 'bg-orange-100 text-orange-700',
+      'Stock bajo': 'bg-yellow-100 text-yellow-700',
+      'Normal': 'bg-green-100 text-green-700',
+    }
+    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${estilos[estado]}`
+  }
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#f0f2f5]">
+      <p className="text-slate-500 text-sm">Cargando...</p>
+    </div>
+  )
+
+  const caducados = reactivos.filter(r => getEstado(r) === 'Caducado').length
+  const reactivosAtencion = reactivos.filter(r => getEstado(r) !== 'Normal')
+
+  return (
+    <div className="flex min-h-screen bg-[#f0f2f5]">
+      <Sidebar rol={usuario?.rol} usuario={usuario} />
+
+      <main className="flex-1 p-8">
+
+        {/* Cabecera */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900" style={{fontFamily: 'DM Sans, sans-serif'}}>
+            Dashboard
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">Resumen del inventario del laboratorio</p>
+        </div>
+
+        {/* Tarjetas resumen */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Caducados</p>
+    <p className="text-3xl font-bold text-red-600">{caducados}</p>
+    <p className="text-xs text-slate-400 mt-1">reactivos</p>
+  </div>
+
+  <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Por caducar</p>
+    <p className="text-3xl font-bold text-orange-500">{alertas.proximos_a_caducar.length}</p>
+    <p className="text-xs text-slate-400 mt-1">en 30 días</p>
+  </div>
+
+  <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Stock bajo</p>
+    <p className="text-3xl font-bold text-yellow-600">{alertas.stock_bajo.length}</p>
+    <p className="text-xs text-slate-400 mt-1">reactivos</p>
+  </div>
+
+  <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-3">Total reactivos</p>
+    <p className="text-3xl font-bold text-slate-800">{reactivos.length}</p>
+    <p className="text-xs text-slate-400 mt-1">registrados</p>
+  </div>
+</div>
+
+        {/* Reactivos que requieren atención */}
+        {reactivosAtencion.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 mb-6">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+              <AlertTriangle size={16} className="text-orange-500" />
+              <h2 className="font-semibold text-slate-800" style={{fontFamily: 'DM Sans, sans-serif'}}>
+                Requieren atención
+              </h2>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {reactivosAtencion.slice(0, 5).map(r => (
+                <div
+                  key={r.id}
+                  onClick={() => navigate(`/reactivos/${r.id}`)}
+                  className="flex justify-between items-center px-6 py-4 hover:bg-slate-50 cursor-pointer transition-colors"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{r.nombre}</p>
+                    <p className="text-xs text-slate-500">{r.cantidad} {r.unidad}</p>
+                  </div>
+                  <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tabla todos los reactivos */}
+        <div className="bg-white rounded-xl border border-slate-200">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h2 className="font-semibold text-slate-800" style={{fontFamily: 'DM Sans, sans-serif'}}>
+              Todos los reactivos
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Reactivo</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Cantidad</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock mín.</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Caducidad</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reactivos.map(r => (
+                  <tr
+                    key={r.id}
+                    onClick={() => navigate(`/reactivos/${r.id}`)}
+                    className="border-b border-slate-50 hover:bg-slate-50 cursor-pointer transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-slate-800">{r.nombre}</p>
+                      <p className="text-xs text-slate-400">{r.unidad}</p>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{r.cantidad} {r.unidad}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{r.stock_minimo} {r.unidad}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{r.fecha_caducidad || '—'}</td>
+                    <td className="px-6 py-4">
+                      <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {reactivos.length === 0 && (
+              <p className="text-center text-slate-400 text-sm py-12">No hay reactivos registrados</p>
+            )}
+          </div>
+        </div>
+
+      </main>
+    </div>
+  )
+}
+
+export default Dashboard
