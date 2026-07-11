@@ -15,7 +15,7 @@ function Sidebar({ rol, usuario }) {
     }`
 
   return (
-    <div className="w-56 min-h-screen bg-[#1a2b4a] flex flex-col">
+    <div className="w-56 h-screen sticky top-0 bg-[#1a2b4a] flex flex-col overflow-y-auto">
 
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[#243659] bg-white">
