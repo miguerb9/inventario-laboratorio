@@ -76,5 +76,5 @@ El frontend estará disponible en `http://localhost:5173`.
 ## Autor
 
 Miguel — Químico · Técnico DAW 
-[LinkedIn] => https://linkedin.com/in/tu-perfil
+[LinkedIn] => www.linkedin.com/in/miguel-ángel-román-bueno-3b9469244
 [GitHub] => https://github.com/miguerb9
