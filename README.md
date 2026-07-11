@@ -18,10 +18,6 @@ Aplicación web fullstack para la gestión de inventario de reactivos químicos 
 
 **Infraestructura:** Docker · Docker Compose
 
-## Capturas de pantalla
-
-*(añadir capturas aquí)*
-
 ## Cómo ejecutarlo en local
 
 ### Requisitos
