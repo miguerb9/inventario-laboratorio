@@ -40,3 +40,8 @@ class UsuarioRespuesta(BaseModel):
     rol: Rol
     class Config:
         from_attributes = True
+    
+class UsuarioActualizar(BaseModel):
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    rol: Optional[Rol] = None

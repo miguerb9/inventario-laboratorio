@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import { getMe } from '../api/auth'
-import { getUsuarios, borrarUsuario, crearUsuario } from '../api/usuarios'
+import { getUsuarios, borrarUsuario, crearUsuario, actualizarUsuario } from '../api/usuarios'
 
 function Usuarios() {
   const navigate = useNavigate()
@@ -10,7 +10,9 @@ function Usuarios() {
   const [usuario, setUsuario] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editando, setEditando] = useState(null)
   const [form, setForm] = useState({ email: '', nombre: '', apellido: '', password: '', rol: 'viewer' })
+  const [formEditar, setFormEditar] = useState({ nombre: '', apellido: '', rol: 'viewer' })
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -53,6 +55,23 @@ function Usuarios() {
     } catch {
       setError('Error al crear el usuario. El email puede estar en uso.')
     }
+  }
+
+  async function handleEditar(e) {
+    e.preventDefault()
+    try {
+      await actualizarUsuario(editando.id, formEditar)
+      const data = await getUsuarios()
+      setUsuarios(data)
+      setEditando(null)
+    } catch {
+      alert('Error al actualizar el usuario')
+    }
+  }
+
+  function abrirEditar(u) {
+    setEditando(u)
+    setFormEditar({ nombre: u.nombre, apellido: u.apellido, rol: u.rol })
   }
 
   function badgeRol(rol) {
@@ -118,12 +137,20 @@ function Usuarios() {
                   {usuario?.rol === 'superadmin' && (
                     <td className="px-6 py-4">
                       {u.id !== usuario.id && (
-                        <button
-                          onClick={() => handleBorrar(u.id)}
-                          className="text-slate-400 hover:text-red-500 text-sm transition-colors"
-                        >
-                          Borrar
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => abrirEditar(u)}
+                            className="text-sm text-slate-500 hover:text-[#1a2b4a] transition-colors"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleBorrar(u.id)}
+                            className="text-sm text-slate-400 hover:text-red-500 transition-colors"
+                          >
+                            Borrar
+                          </button>
+                        </div>
                       )}
                     </td>
                   )}
@@ -132,7 +159,6 @@ function Usuarios() {
             </tbody>
           </table>
         </div>
-
       </div>
 
       {/* Modal crear usuario */}
@@ -142,13 +168,11 @@ function Usuarios() {
             <h2 className="text-lg font-semibold text-slate-800 mb-5" style={{fontFamily: 'DM Sans, sans-serif'}}>
               Nuevo usuario
             </h2>
-
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2.5 mb-4">
                 {error}
               </div>
             )}
-
             <form onSubmit={handleCrear} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -215,6 +239,66 @@ function Usuarios() {
                   className="flex-1 bg-[#1a2b4a] text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-[#243659] transition-colors"
                 >
                   Crear usuario
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal editar usuario */}
+      {editando && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold text-slate-800 mb-5" style={{fontFamily: 'DM Sans, sans-serif'}}>
+              Editar usuario
+            </h2>
+            <form onSubmit={handleEditar} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nombre</label>
+                  <input
+                    value={formEditar.nombre}
+                    onChange={e => setFormEditar({...formEditar, nombre: e.target.value})}
+                    required
+                    className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Apellido</label>
+                  <input
+                    value={formEditar.apellido}
+                    onChange={e => setFormEditar({...formEditar, apellido: e.target.value})}
+                    required
+                    className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Rol</label>
+                <select
+                  value={formEditar.rol}
+                  onChange={e => setFormEditar({...formEditar, rol: e.target.value})}
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                >
+                  <option value="viewer">Viewer</option>
+                  <option value="admin">Admin</option>
+                  <option value="superadmin">Superadmin</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditando(null)}
+                  className="flex-1 border border-slate-200 text-slate-600 rounded-lg py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#1a2b4a] text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-[#243659] transition-colors"
+                >
+                  Guardar cambios
                 </button>
               </div>
             </form>

@@ -14,3 +14,8 @@ export async function crearUsuario(datos) {
   const response = await client.post('/registro', datos)
   return response.data
 }
+
+export async function actualizarUsuario(id, datos) {
+  const response = await client.put(`/usuarios/${id}`, datos)
+  return response.data
+}

@@ -17,13 +17,12 @@ function Sidebar({ rol, usuario }) {
   return (
     <div className="w-56 min-h-screen bg-[#1a2b4a] flex flex-col">
 
-      <div className="px-5 py-5 border-b border-[#243659]">
-        <div className="flex items-center gap-2.5">
-          <img src={logo} alt="Stockix" className="h-7" />
-          <span className="text-white font-semibold text-base" style={{fontFamily: 'DM Sans, sans-serif'}}>Stockix</span>
-        </div>
+      {/* Logo */}
+      <div className="px-5 py-5 border-b border-[#243659] bg-white">
+        <img src={logo} alt="Stockix" className="h-8" />
       </div>
 
+      {/* Navegación */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
         <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
         <NavLink to="/reactivos" className={linkClass}>Reactivos</NavLink>
@@ -33,6 +32,7 @@ function Sidebar({ rol, usuario }) {
         )}
       </nav>
 
+      {/* Perfil y cerrar sesión */}
       <div className="px-3 py-4 border-t border-[#243659]">
         <NavLink
           to="/perfil"

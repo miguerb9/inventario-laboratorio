@@ -30,3 +30,20 @@ def borrar_usuario(usuario_id: int, db: Session = Depends(get_db), usuario_actua
     db.delete(usuario)
     db.commit()
     return {"mensaje": f"Usuario {usuario_id} eliminado correctamente"}
+
+@router.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioRespuesta)
+def actualizar_usuario(usuario_id: int, datos: schemas.UsuarioActualizar, db: Session = Depends(get_db), usuario_actual = Depends(obtener_usuario_actual)):
+    if usuario_actual.rol != "superadmin":
+        raise HTTPException(status_code=403, detail="Solo el superadmin puede modificar usuarios")
+    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    if datos.nombre is not None:
+        usuario.nombre = datos.nombre
+    if datos.apellido is not None:
+        usuario.apellido = datos.apellido
+    if datos.rol is not None:
+        usuario.rol = datos.rol
+    db.commit()
+    db.refresh(usuario)
+    return usuario
