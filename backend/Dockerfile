@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT
+CMD python -c "from database import engine, Base; import models; Base.metadata.create_all(bind=engine)" && alembic stamp head && uvicorn main:app --host 0.0.0.0 --port $PORTCMD alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT
