@@ -65,7 +65,7 @@ function Dashboard() {
     <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <main className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+      <main className="flex-1 p-4 pt-20 sm:p-6 sm:pt-20 md:p-8 w-full min-w-0">
 
         {/* Cabecera */}
         <div className="mb-6 md:mb-8">
@@ -136,7 +136,29 @@ function Dashboard() {
               Todos los reactivos
             </h2>
           </div>
-          <div className="overflow-x-auto">
+          {/* Vista tarjetas: solo móvil */}
+          <div className="sm:hidden divide-y divide-slate-50">
+            {reactivos.map(r => (
+              <div
+                key={r.id}
+                onClick={() => navigate(`/reactivos/${r.id}`)}
+                className="px-4 py-4 active:bg-slate-50 cursor-pointer transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p className="text-sm font-medium text-slate-800">{r.nombre}</p>
+                  <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-500">
+                  <p>Cantidad: <span className="text-slate-700">{r.cantidad} {r.unidad}</span></p>
+                  <p>Stock mín.: <span className="text-slate-700">{r.stock_minimo} {r.unidad}</span></p>
+                  <p className="col-span-2">Caducidad: <span className="text-slate-700">{r.fecha_caducidad || '—'}</span></p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Vista tabla: desde sm hacia arriba */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-slate-100">
@@ -168,10 +190,10 @@ function Dashboard() {
                 ))}
               </tbody>
             </table>
-            {reactivos.length === 0 && (
-              <p className="text-center text-slate-400 text-sm py-12">No hay reactivos registrados</p>
-            )}
           </div>
+          {reactivos.length === 0 && (
+            <p className="text-center text-slate-400 text-sm py-12">No hay reactivos registrados</p>
+          )}
         </div>
 
       </main>

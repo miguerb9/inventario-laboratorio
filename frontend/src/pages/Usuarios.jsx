@@ -93,7 +93,7 @@ function Usuarios() {
     <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+      <div className="flex-1 p-4 pt-20 sm:p-6 sm:pt-20 md:p-8 w-full min-w-0">
 
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
@@ -113,7 +113,37 @@ function Usuarios() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200">
-          <div className="overflow-x-auto">
+          {/* Vista tarjetas: solo móvil */}
+          <div className="sm:hidden divide-y divide-slate-50">
+            {usuarios.map(u => (
+              <div key={u.id} className="px-4 py-4">
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <p className="text-sm font-medium text-slate-800">{u.nombre} {u.apellido}</p>
+                  <span className={badgeRol(u.rol)}>{u.rol}</span>
+                </div>
+                <p className="text-xs text-slate-500 mb-2 break-words">{u.email}</p>
+                {usuario?.rol === 'superadmin' && u.id !== usuario.id && (
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => abrirEditar(u)}
+                      className="text-xs text-slate-500 active:text-[#1a2b4a] transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleBorrar(u.id)}
+                      className="text-xs text-slate-400 active:text-red-500 transition-colors"
+                    >
+                      Borrar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Vista tabla: desde sm hacia arriba */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[560px]">
               <thead>
                 <tr className="border-b border-slate-100">

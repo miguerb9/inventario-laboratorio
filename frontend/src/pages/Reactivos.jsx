@@ -123,7 +123,7 @@ function Reactivos() {
     <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+      <div className="flex-1 p-4 pt-20 sm:p-6 sm:pt-20 md:p-8 w-full min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900" style={{ fontFamily: "DM Sans, sans-serif" }}>
@@ -143,7 +143,40 @@ function Reactivos() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200">
-          <div className="overflow-x-auto">
+          {/* Vista tarjetas: solo móvil */}
+          <div className="sm:hidden divide-y divide-slate-50">
+            {reactivos.map((r) => (
+              <div key={r.id} className="px-4 py-4">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p
+                    className="text-sm font-medium text-slate-800 cursor-pointer active:text-[#1a2b4a]"
+                    onClick={() => navigate(`/reactivos/${r.id}`)}
+                  >
+                    {r.nombre}
+                  </p>
+                  <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-500 mb-2">
+                  <p>Cantidad: <span className="text-slate-700">{r.cantidad} {r.unidad}</span></p>
+                  <p>Stock mín.: <span className="text-slate-700">{r.stock_minimo} {r.unidad}</span></p>
+                  <p className="col-span-2">Vencimiento: <span className="text-slate-700">{r.fecha_caducidad || "—"}</span></p>
+                </div>
+                {(usuario?.rol === "admin" || usuario?.rol === "superadmin") && (
+                  <div className="flex items-center gap-4 pt-1">
+                    <button onClick={() => abrirFormEditar(r)} className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Pencil size={14} /> Editar
+                    </button>
+                    <button onClick={() => handleBorrar(r.id)} className="flex items-center gap-1.5 text-xs text-red-500">
+                      <Trash2 size={14} /> Borrar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Vista tabla: desde sm hacia arriba */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="border-b border-slate-100">

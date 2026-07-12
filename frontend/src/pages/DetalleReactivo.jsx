@@ -99,7 +99,7 @@ function DetalleReactivo() {
     <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+      <div className="flex-1 p-4 pt-20 sm:p-6 sm:pt-20 md:p-8 w-full min-w-0">
         {/* Volver */}
         <button
           onClick={() => navigate(-1)}
