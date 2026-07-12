@@ -27,17 +27,17 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#f0f2f5] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
 
-        <div className="flex flex-col items-center mb-8">
-          <img src={logo} alt="Stockix" className="h-20 mb-3" />
-          <p className="text-sm text-slate-500 tracking-wide uppercase font-medium">
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <img src={logo} alt="Stockix" className="h-16 sm:h-20 mb-3" />
+          <p className="text-sm text-slate-500 tracking-wide uppercase font-medium text-center">
             Inventario de Reactivos
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 px-5 sm:px-8 py-6 sm:py-8">
           <h2 className="text-lg font-semibold text-slate-800 mb-6">
             Accede a tu cuenta
           </h2>
@@ -72,12 +72,12 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition pr-10"
+                  className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs px-1 py-1"
                 >
                   {showPassword ? 'Ocultar' : 'Ver'}
                 </button>

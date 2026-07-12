@@ -59,7 +59,7 @@ function Reactivos() {
       "Stock bajo": "bg-yellow-100 text-yellow-700",
       Normal: "bg-green-100 text-green-700",
     };
-    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${estilos[estado]}`;
+    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${estilos[estado]}`;
   }
 
   function abrirFormNuevo() {
@@ -120,13 +120,13 @@ function Reactivos() {
     );
 
   return (
-    <div className="flex min-h-screen bg-[#f0f2f5]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: "DM Sans, sans-serif" }}>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900" style={{ fontFamily: "DM Sans, sans-serif" }}>
               Reactivos
             </h1>
             <p className="text-slate-500 text-sm mt-1">{reactivos.length} reactivos registrados</p>
@@ -134,7 +134,7 @@ function Reactivos() {
           {(usuario?.rol === "admin" || usuario?.rol === "superadmin") && (
             <button
               onClick={abrirFormNuevo}
-              className="flex items-center gap-2 bg-[#1a2b4a] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#243659] transition-colors"
+              className="flex items-center gap-2 bg-[#1a2b4a] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#243659] transition-colors whitespace-nowrap"
             >
               <Plus size={16} />
               Añadir reactivo
@@ -143,50 +143,52 @@ function Reactivos() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Reactivo</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Cantidad</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Unidad</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock mín.</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Vencimiento</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Estado</th>
-                <th className="px-6 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {reactivos.map((r) => (
-                <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td
-                    className="px-6 py-4 text-sm font-medium text-slate-800 cursor-pointer hover:text-[#1a2b4a]"
-                    onClick={() => navigate(`/reactivos/${r.id}`)}
-                  >
-                    {r.nombre}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{r.cantidad}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{r.unidad}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{r.stock_minimo}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{r.fecha_caducidad || "—"}</td>
-                  <td className="px-6 py-4">
-                    <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    {(usuario?.rol === "admin" || usuario?.rol === "superadmin") && (
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => abrirFormEditar(r)} className="text-slate-400 hover:text-[#1a2b4a] transition-colors">
-                          <Pencil size={15} />
-                        </button>
-                        <button onClick={() => handleBorrar(r.id)} className="text-slate-400 hover:text-red-500 transition-colors">
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px]">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Reactivo</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Cantidad</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Unidad</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Stock mín.</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Vencimiento</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Estado</th>
+                  <th className="px-4 sm:px-6 py-3"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {reactivos.map((r) => (
+                  <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <td
+                      className="px-4 sm:px-6 py-4 text-sm font-medium text-slate-800 cursor-pointer hover:text-[#1a2b4a]"
+                      onClick={() => navigate(`/reactivos/${r.id}`)}
+                    >
+                      {r.nombre}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.cantidad}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.unidad}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.stock_minimo}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.fecha_caducidad || "—"}</td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <span className={getBadge(getEstado(r))}>{getEstado(r)}</span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      {(usuario?.rol === "admin" || usuario?.rol === "superadmin") && (
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => abrirFormEditar(r)} className="text-slate-400 hover:text-[#1a2b4a] transition-colors">
+                            <Pencil size={15} />
+                          </button>
+                          <button onClick={() => handleBorrar(r.id)} className="text-slate-400 hover:text-red-500 transition-colors">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {reactivos.length === 0 && (
             <p className="text-center text-slate-400 text-sm py-12">No hay reactivos registrados</p>
           )}
@@ -194,8 +196,8 @@ function Reactivos() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold text-slate-800 mb-5" style={{ fontFamily: "DM Sans, sans-serif" }}>
               {editando ? "Editar reactivo" : "Añadir reactivo"}
             </h2>
@@ -209,7 +211,7 @@ function Reactivos() {
                   className="w-full border border-slate-200 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Cantidad</label>
                   <input
@@ -256,7 +258,7 @@ function Reactivos() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Fecha caducidad</label>
                   <input

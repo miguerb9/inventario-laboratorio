@@ -55,7 +55,7 @@ function DetalleReactivo() {
       Normal: 'bg-green-100 text-green-700'
     }
 
-    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${estilos[estado]}`
+    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${estilos[estado]}`
   }
 
   async function handleSubirFDS(e) {
@@ -96,10 +96,10 @@ function DetalleReactivo() {
   const estado = getEstado(reactivo)
 
   return (
-    <div className="flex min-h-screen bg-[#f0f2f5]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
         {/* Volver */}
         <button
           onClick={() => navigate(-1)}
@@ -112,9 +112,9 @@ function DetalleReactivo() {
         {/* Cabecera */}
         <div className="flex items-center gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h1
-                className="text-2xl font-bold text-slate-900"
+                className="text-xl sm:text-2xl font-bold text-slate-900 break-words"
                 style={{ fontFamily: 'DM Sans, sans-serif' }}
               >
                 {reactivo.nombre}
@@ -128,7 +128,7 @@ function DetalleReactivo() {
         </div>
 
         {/* Tarjetas resumen */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-slate-200 p-5">
             <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1">
               Cantidad actual
@@ -170,10 +170,10 @@ function DetalleReactivo() {
 
         {/* Pestañas */}
         <div className="bg-white rounded-xl border border-slate-200">
-          <div className="flex border-b border-slate-100">
+          <div className="flex border-b border-slate-100 overflow-x-auto">
             <button
               onClick={() => setPestana('info')}
-              className={`px-6 py-3.5 text-sm font-medium transition-colors ${
+              className={`px-4 sm:px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
                 pestana === 'info'
                   ? 'text-[#1a2b4a] border-b-2 border-[#1a2b4a]'
                   : 'text-slate-500 hover:text-slate-800'
@@ -184,7 +184,7 @@ function DetalleReactivo() {
 
             <button
               onClick={() => setPestana('fds')}
-              className={`px-6 py-3.5 text-sm font-medium transition-colors ${
+              className={`px-4 sm:px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors ${
                 pestana === 'fds'
                   ? 'text-[#1a2b4a] border-b-2 border-[#1a2b4a]'
                   : 'text-slate-500 hover:text-slate-800'
@@ -194,14 +194,14 @@ function DetalleReactivo() {
             </button>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {pestana === 'info' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold mb-1">
                     Nombre
                   </p>
-                  <p className="text-sm text-slate-800">{reactivo.nombre}</p>
+                  <p className="text-sm text-slate-800 break-words">{reactivo.nombre}</p>
                 </div>
 
                 <div>
@@ -239,11 +239,11 @@ function DetalleReactivo() {
             {pestana === 'fds' && (
               <div>
                 {reactivo.fds_pdf ? (
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3">
                       <FileText
                         size={20}
-                        className="text-[#1a2b4a]"
+                        className="text-[#1a2b4a] shrink-0"
                       />
                       <span className="text-sm text-slate-700">
                         Ficha de seguridad

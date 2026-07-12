@@ -80,7 +80,7 @@ function Usuarios() {
       admin: 'bg-blue-100 text-blue-700',
       viewer: 'bg-slate-100 text-slate-600',
     }
-    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${estilos[rol] || estilos.viewer}`
+    return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${estilos[rol] || estilos.viewer}`
   }
 
   if (loading) return (
@@ -90,14 +90,14 @@ function Usuarios() {
   )
 
   return (
-    <div className="flex min-h-screen bg-[#f0f2f5]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
 
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900" style={{fontFamily: 'DM Sans, sans-serif'}}>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900" style={{fontFamily: 'DM Sans, sans-serif'}}>
               Usuarios
             </h1>
             <p className="text-slate-500 text-sm mt-1">{usuarios.length} usuarios registrados</p>
@@ -105,7 +105,7 @@ function Usuarios() {
           {usuario?.rol === 'superadmin' && (
             <button
               onClick={() => setShowForm(true)}
-              className="bg-[#1a2b4a] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#243659] transition-colors"
+              className="bg-[#1a2b4a] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#243659] transition-colors whitespace-nowrap"
             >
               + Añadir usuario
             </button>
@@ -113,58 +113,60 @@ function Usuarios() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Nombre</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rol</th>
-                {usuario?.rol === 'superadmin' && (
-                  <th className="px-6 py-3"></th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map(u => (
-                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <p className="text-sm font-medium text-slate-800">{u.nombre} {u.apellido}</p>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{u.email}</td>
-                  <td className="px-6 py-4">
-                    <span className={badgeRol(u.rol)}>{u.rol}</span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px]">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Nombre</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                  <th className="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rol</th>
                   {usuario?.rol === 'superadmin' && (
-                    <td className="px-6 py-4">
-                      {u.id !== usuario.id && (
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => abrirEditar(u)}
-                            className="text-sm text-slate-500 hover:text-[#1a2b4a] transition-colors"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleBorrar(u.id)}
-                            className="text-sm text-slate-400 hover:text-red-500 transition-colors"
-                          >
-                            Borrar
-                          </button>
-                        </div>
-                      )}
-                    </td>
+                    <th className="px-4 sm:px-6 py-3"></th>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {usuarios.map(u => (
+                  <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <td className="px-4 sm:px-6 py-4">
+                      <p className="text-sm font-medium text-slate-800">{u.nombre} {u.apellido}</p>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-slate-600">{u.email}</td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <span className={badgeRol(u.rol)}>{u.rol}</span>
+                    </td>
+                    {usuario?.rol === 'superadmin' && (
+                      <td className="px-4 sm:px-6 py-4">
+                        {u.id !== usuario.id && (
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => abrirEditar(u)}
+                              className="text-sm text-slate-500 hover:text-[#1a2b4a] transition-colors"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() => handleBorrar(u.id)}
+                              className="text-sm text-slate-400 hover:text-red-500 transition-colors"
+                            >
+                              Borrar
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* Modal crear usuario */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold text-slate-800 mb-5" style={{fontFamily: 'DM Sans, sans-serif'}}>
               Nuevo usuario
             </h2>
@@ -174,7 +176,7 @@ function Usuarios() {
               </div>
             )}
             <form onSubmit={handleCrear} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nombre</label>
                   <input
@@ -248,13 +250,13 @@ function Usuarios() {
 
       {/* Modal editar usuario */}
       {editando && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5 sm:p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-semibold text-slate-800 mb-5" style={{fontFamily: 'DM Sans, sans-serif'}}>
               Editar usuario
             </h2>
             <form onSubmit={handleEditar} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nombre</label>
                   <input

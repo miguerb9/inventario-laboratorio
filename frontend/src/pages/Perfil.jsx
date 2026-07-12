@@ -38,26 +38,25 @@ function Perfil() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#f0f2f5]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#f0f2f5]">
       <Sidebar rol={usuario?.rol} usuario={usuario} />
 
-      <div className="flex-1 p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900" style={{fontFamily: 'DM Sans, sans-serif'}}>
+      <div className="flex-1 p-4 sm:p-6 md:p-8 w-full min-w-0">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900" style={{fontFamily: 'DM Sans, sans-serif'}}>
             Mi perfil
           </h1>
           <p className="text-slate-500 text-sm mt-1">Información de tu cuenta</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-8 max-w-lg">
-          
+        <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-8 max-w-lg">
           {/* Avatar */}
-          <div className="flex items-center gap-4 mb-8 pb-8 border-b border-slate-100">
-            <div className="w-14 h-14 rounded-full bg-[#1a2b4a] flex items-center justify-center text-white text-xl font-bold">
+          <div className="flex items-center gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-slate-100">
+            <div className="w-14 h-14 shrink-0 rounded-full bg-[#1a2b4a] flex items-center justify-center text-white text-xl font-bold">
               {usuario.nombre[0]}{usuario.apellido[0]}
             </div>
-            <div>
-              <p className="font-semibold text-slate-800 text-lg">{usuario.nombre} {usuario.apellido}</p>
+            <div className="min-w-0">
+              <p className="font-semibold text-slate-800 text-lg break-words">{usuario.nombre} {usuario.apellido}</p>
               <span className={badgeRol(usuario.rol)}>{usuario.rol}</span>
             </div>
           </div>
@@ -66,15 +65,15 @@ function Perfil() {
           <div className="space-y-5">
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Nombre</p>
-              <p className="text-sm text-slate-800">{usuario.nombre}</p>
+              <p className="text-sm text-slate-800 break-words">{usuario.nombre}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Apellido</p>
-              <p className="text-sm text-slate-800">{usuario.apellido}</p>
+              <p className="text-sm text-slate-800 break-words">{usuario.apellido}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Email</p>
-              <p className="text-sm text-slate-800">{usuario.email}</p>
+              <p className="text-sm text-slate-800 break-words">{usuario.email}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Rol</p>
