@@ -19,6 +19,13 @@ class ReactivoBase(BaseModel):
 class ReactivoCrear(ReactivoBase):
     pass
 
+class ReactivoActualizar(BaseModel):
+    nombre: str
+    cantidad: float
+    unidad: str
+    fecha_caducidad: Optional[date] = None
+    stock_minimo: float = 0
+
 class ReactivoRespuesta(ReactivoBase):
     id: int
 
@@ -45,3 +52,4 @@ class UsuarioActualizar(BaseModel):
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     rol: Optional[Rol] = None
+

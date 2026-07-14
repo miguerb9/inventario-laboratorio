@@ -178,7 +178,6 @@ function Dashboard() {
                   >
                     <td className="px-4 sm:px-6 py-4">
                       <p className="text-sm font-medium text-slate-800">{r.nombre}</p>
-                      <p className="text-xs text-slate-400">{r.unidad}</p>
                     </td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.cantidad} {r.unidad}</td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{r.stock_minimo} {r.unidad}</td>

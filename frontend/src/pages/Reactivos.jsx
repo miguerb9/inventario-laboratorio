@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, FileText, X } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import {
   getReactivos,
@@ -9,6 +9,7 @@ import {
   borrarReactivo,
 } from "../api/reactivos";
 import { getMe } from "../api/auth";
+import client from "../api/client";
 
 function Reactivos() {
   const [reactivos, setReactivos] = useState([]);
@@ -23,6 +24,8 @@ function Reactivos() {
     fecha_caducidad: "",
     stock_minimo: "",
   });
+  const [fdsArchivo, setFdsArchivo] = useState(null);
+  const [guardando, setGuardando] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,6 +68,7 @@ function Reactivos() {
   function abrirFormNuevo() {
     setEditando(null);
     setForm({ nombre: "", cantidad: "", unidad: "", fecha_caducidad: "", stock_minimo: "" });
+    setFdsArchivo(null);
     setShowForm(true);
   }
 
@@ -77,7 +81,30 @@ function Reactivos() {
       fecha_caducidad: r.fecha_caducidad || "",
       stock_minimo: r.stock_minimo,
     });
+    setFdsArchivo(null);
     setShowForm(true);
+  }
+
+  function handleArchivoChange(e) {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+
+    if (archivo.type !== "application/pdf") {
+      alert("El archivo debe ser un PDF");
+      e.target.value = "";
+      return;
+    }
+
+    setFdsArchivo(archivo);
+  }
+
+  async function subirFDS(id) {
+    const formData = new FormData();
+    formData.append("archivo", fdsArchivo);
+
+    await client.post(`/reactivos/${id}/fds`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   }
 
   async function handleSubmit(e) {
@@ -88,17 +115,34 @@ function Reactivos() {
       stock_minimo: parseFloat(form.stock_minimo),
       fecha_caducidad: form.fecha_caducidad || null,
     };
+
+    setGuardando(true);
     try {
+      let reactivoId = editando;
+
       if (editando) {
         await actualizarReactivo(editando, datos);
       } else {
-        await crearReactivo(datos);
+        const creado = await crearReactivo(datos);
+        reactivoId = creado?.id;
       }
+
+      // Si el usuario adjuntó una FDS, se sube tras crear/editar el reactivo
+      if (fdsArchivo && reactivoId) {
+        try {
+          await subirFDS(reactivoId);
+        } catch {
+          alert("El reactivo se guardó, pero hubo un error al subir la FDS");
+        }
+      }
+
       const data = await getReactivos();
       setReactivos(data);
       setShowForm(false);
     } catch {
       alert("Error al guardar el reactivo");
+    } finally {
+      setGuardando(false);
     }
   }
 
@@ -313,6 +357,47 @@ function Reactivos() {
                   />
                 </div>
               </div>
+
+              {/* Ficha de seguridad (opcional) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Ficha de seguridad (PDF, opcional)
+                </label>
+
+                {fdsArchivo ? (
+                  <div className="flex items-center justify-between gap-3 border border-slate-200 rounded-lg px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText size={16} className="text-[#1a2b4a] shrink-0" />
+                      <span className="text-sm text-slate-700 truncate">{fdsArchivo.name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFdsArchivo(null)}
+                      className="text-slate-400 hover:text-red-500 shrink-0"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center gap-2 border border-dashed border-slate-300 rounded-lg px-3.5 py-3 text-sm text-slate-500 cursor-pointer hover:bg-slate-50 transition-colors">
+                    <FileText size={16} />
+                    Seleccionar PDF
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleArchivoChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+
+                {editando && !fdsArchivo && (
+                  <p className="text-xs text-slate-400 mt-1.5">
+                    Si el reactivo ya tiene una FDS, subir un nuevo PDF la sustituirá.
+                  </p>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -323,9 +408,10 @@ function Reactivos() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#1a2b4a] text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-[#243659] transition-colors"
+                  disabled={guardando}
+                  className="flex-1 bg-[#1a2b4a] text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-[#243659] transition-colors disabled:opacity-60"
                 >
-                  {editando ? "Guardar cambios" : "Añadir"}
+                  {guardando ? "Guardando..." : editando ? "Guardar cambios" : "Añadir"}
                 </button>
               </div>
             </form>

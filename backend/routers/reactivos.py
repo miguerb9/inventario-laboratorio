@@ -37,7 +37,7 @@ def obtener_reactivo(reactivo_id: int, db: Session = Depends(get_db)):
     return reactivo
 
 @router.put("/reactivos/{reactivo_id}", response_model=schemas.ReactivoRespuesta)
-def actualizar_reactivo(reactivo_id: int, datos: schemas.ReactivoCrear, db: Session = Depends(get_db)):
+def actualizar_reactivo(reactivo_id: int, datos: schemas.ReactivoActualizar, db: Session = Depends(get_db)):
     reactivo = db.query(models.Reactivo).filter(models.Reactivo.id == reactivo_id).first()
     if reactivo is None:
         raise HTTPException(status_code=404, detail="Reactivo no encontrado")
