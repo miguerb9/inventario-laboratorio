@@ -239,25 +239,52 @@ function DetalleReactivo() {
             {pestana === 'fds' && (
               <div>
                 {reactivo.fds_pdf ? (
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3">
-                      <FileText
-                        size={20}
-                        className="text-[#1a2b4a] shrink-0"
-                      />
-                      <span className="text-sm text-slate-700">
-                        Ficha de seguridad
-                      </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4">
+                      <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3">
+                        <FileText
+                          size={20}
+                          className="text-[#1a2b4a] shrink-0"
+                        />
+                        <span className="text-sm text-slate-700">
+                          Ficha de seguridad
+                        </span>
+                      </div>
+
+                      <a
+                        href={`http://127.0.0.1:8000/reactivos/${id}/fds`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#1a2b4a] font-medium hover:underline"
+                      >
+                        Abrir en pestaña nueva
+                      </a>
                     </div>
 
-                    <a
-                      href={`http://127.0.0.1:8000/reactivos/${id}/fds`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-[#1a2b4a] font-medium hover:underline"
-                    >
-                      Ver / Descargar PDF
-                    </a>
+                    {/* Previsualización del PDF */}
+                    <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                      <object
+                        data={`http://127.0.0.1:8000/reactivos/${id}/fds`}
+                        type="application/pdf"
+                        className="w-full"
+                        style={{ height: '75vh' }}
+                      >
+                        <div className="flex flex-col items-center justify-center gap-3 p-8 text-center">
+                          <FileText size={32} className="text-slate-400" />
+                          <p className="text-sm text-slate-500">
+                            Tu navegador no puede previsualizar el PDF.
+                          </p>
+                          <a
+                            href={`http://127.0.0.1:8000/reactivos/${id}/fds`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-[#1a2b4a] font-medium hover:underline"
+                          >
+                            Descargar / Abrir PDF
+                          </a>
+                        </div>
+                      </object>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-sm text-slate-400 mb-4">

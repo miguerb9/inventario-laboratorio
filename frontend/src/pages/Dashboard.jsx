@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, FlaskConical, Calendar, TrendingDown } from 'lucide-react'
+import { AlertTriangle, FlaskConical, Calendar, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { getReactivos } from '../api/reactivos'
 import { getMe } from '../api/auth'
 import client from '../api/client'
+
+const POR_PAGINA = 10
 
 function Dashboard() {
   const navigate = useNavigate()
@@ -12,6 +14,7 @@ function Dashboard() {
   const [usuario, setUsuario] = useState(null)
   const [alertas, setAlertas] = useState({ stock_bajo: [], proximos_a_caducar: [] })
   const [loading, setLoading] = useState(true)
+  const [pagina, setPagina] = useState(1)
 
   useEffect(() => {
     async function cargar() {
@@ -50,6 +53,22 @@ function Dashboard() {
       'Normal': 'bg-green-100 text-green-700',
     }
     return `inline-block px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${estilos[estado]}`
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(reactivos.length / POR_PAGINA))
+
+  const reactivosPagina = useMemo(() => {
+    const inicio = (pagina - 1) * POR_PAGINA
+    return reactivos.slice(inicio, inicio + POR_PAGINA)
+  }, [reactivos, pagina])
+
+  useEffect(() => {
+    if (pagina > totalPaginas) setPagina(totalPaginas)
+  }, [totalPaginas, pagina])
+
+  function irAPagina(p) {
+    const destino = Math.min(Math.max(p, 1), totalPaginas)
+    setPagina(destino)
   }
 
   if (loading) return (
@@ -138,7 +157,7 @@ function Dashboard() {
           </div>
           {/* Vista tarjetas: solo móvil */}
           <div className="sm:hidden divide-y divide-slate-50">
-            {reactivos.map(r => (
+            {reactivosPagina.map(r => (
               <div
                 key={r.id}
                 onClick={() => navigate(`/reactivos/${r.id}`)}
@@ -170,7 +189,7 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {reactivos.map(r => (
+                {reactivosPagina.map(r => (
                   <tr
                     key={r.id}
                     onClick={() => navigate(`/reactivos/${r.id}`)}
@@ -190,8 +209,71 @@ function Dashboard() {
               </tbody>
             </table>
           </div>
+
           {reactivos.length === 0 && (
             <p className="text-center text-slate-400 text-sm py-12">No hay reactivos registrados</p>
+          )}
+
+          {/* Paginación */}
+          {reactivos.length > POR_PAGINA && (
+            <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-slate-100">
+              <p className="text-xs text-slate-500 hidden sm:block">
+                Mostrando {(pagina - 1) * POR_PAGINA + 1}
+                {'–'}
+                {Math.min(pagina * POR_PAGINA, reactivos.length)} de {reactivos.length}
+              </p>
+
+              <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
+                <button
+                  onClick={() => irAPagina(pagina - 1)}
+                  disabled={pagina === 1}
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                  .filter(p =>
+                    p === 1 ||
+                    p === totalPaginas ||
+                    Math.abs(p - pagina) <= 1
+                  )
+                  .reduce((acc, p, idx, arr) => {
+                    if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...' + p)
+                    acc.push(p)
+                    return acc
+                  }, [])
+                  .map((p, idx) =>
+                    typeof p === 'string' ? (
+                      <span key={`gap-${idx}`} className="px-1.5 text-xs text-slate-400 select-none">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => irAPagina(p)}
+                        className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-medium transition-colors ${
+                          p === pagina
+                            ? 'bg-[#1a2b4a] text-white'
+                            : 'text-slate-600 hover:bg-slate-50 border border-slate-200'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                <button
+                  onClick={() => irAPagina(pagina + 1)}
+                  disabled={pagina === totalPaginas}
+                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Página siguiente"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
